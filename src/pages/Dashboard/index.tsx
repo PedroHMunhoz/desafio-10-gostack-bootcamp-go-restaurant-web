@@ -27,7 +27,9 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
-      // TODO LOAD FOODS
+      const response = await api.get('foods');
+
+      setFoods(response.data);
     }
 
     loadFoods();
@@ -37,7 +39,18 @@ const Dashboard: React.FC = () => {
     food: Omit<IFoodPlate, 'id' | 'available'>,
   ): Promise<void> {
     try {
-      // TODO ADD A NEW FOOD PLATE TO THE API
+      // Desestruturando o item recebido como parâmetro
+      const { name, image, price, description } = food;
+
+      // Montagem do novo item, setando o Available como TRUE
+      const newFood = {
+        available: true,
+        id: foods.length + 1,
+        ...food,
+      } as IFoodPlate;
+
+      // Setando no state o novo item no array de itens
+      setFoods([newFood, ...foods]);
     } catch (err) {
       console.log(err);
     }
@@ -46,11 +59,36 @@ const Dashboard: React.FC = () => {
   async function handleUpdateFood(
     food: Omit<IFoodPlate, 'id' | 'available'>,
   ): Promise<void> {
-    // TODO UPDATE A FOOD PLATE ON THE API
+    // Desestrutura o objeto
+    const { name, image, price, description } = food;
+
+    // Copia o array do state para um local
+    const newFoodsArray = [...foods];
+
+    // Encontra o item que estou editando dentro do array local
+    const index = newFoodsArray.findIndex(
+      searchFood => searchFood.id === editingFood.id,
+    );
+
+    // Altera o objeto encontrado no array
+    newFoodsArray[index] = {
+      id: editingFood.id,
+      name,
+      image,
+      price,
+      description,
+    } as IFoodPlate;
+
+    // Seta o state como o novo array, já com o objeto alterado
+    setFoods(newFoodsArray);
   }
 
   async function handleDeleteFood(id: number): Promise<void> {
-    // TODO DELETE A FOOD PLATE FROM THE API
+    // Filtro o array atual de foods no state e trago somente os que são diferentes do que eu mandei deletar
+    const newFoods = foods.filter(food => food.id !== id);
+
+    // Reseta o state com o novo array, sem que foi removido
+    setFoods(newFoods);
   }
 
   function toggleModal(): void {
@@ -62,7 +100,11 @@ const Dashboard: React.FC = () => {
   }
 
   function handleEditFood(food: IFoodPlate): void {
-    // TODO SET THE CURRENT EDITING FOOD ID IN THE STATE
+    // Seta o objeto atual como sendo o de edição
+    setEditingFood(food);
+
+    // Abre o modal de edição
+    toggleEditModal();
   }
 
   return (
